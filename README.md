@@ -5,10 +5,10 @@
 ### Modern Material 3 Expressive Font Manager & Custom Font Installer
 **Designed specifically for Realme UI, ColorOS, and OxygenOS**
 
-[![Release](https://img.shields.io/badge/Release-v1.11-7C4DFF?style=for-the-badge&logo=android)](https://github.com/WDhairya/xfont-tool/releases)
-[![Android](https://img.shields.io/badge/Android-8.0%20--%2015-34A853?style=for-the-badge&logo=android)](https://github.com/WDhairya/xfont-tool)
-[![Tested On](https://img.shields.io/badge/Tested%20On-Realme%20UI%206.0%20(Android%2015)-FF5252?style=for-the-badge&logo=oppo)](https://github.com/WDhairya/xfont-tool)
-[![Theme](https://img.shields.io/badge/UI-Material%203%20Expressive-6750A4?style=for-the-badge)](https://github.com/WDhairya/xfont-tool)
+[![Release](https://img.shields.io/badge/Release-v1.11-7C4DFF?style=for-the-badge&logo=android)](https://github.com/wdhairyaa/xfont-tool/releases)
+[![Android](https://img.shields.io/badge/Android-8.0%20--%2015-34A853?style=for-the-badge&logo=android)](https://github.com/wdhairyaa/xfont-tool)
+[![Tested On](https://img.shields.io/badge/Tested%20On-Realme%20UI%206.0%20(Android%2015)-FF5252?style=for-the-badge&logo=oppo)](https://github.com/wdhairyaa/xfont-tool)
+[![Theme](https://img.shields.io/badge/UI-Material%203%20Expressive-6750A4?style=for-the-badge)](https://github.com/wdhairyaa/xfont-tool)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge)](LICENSE)
 
 <br/>
@@ -88,7 +88,7 @@ flowchart LR
 ```
 
 ### Detailed Steps:
-1. **Download & Install**: Grab the latest `xfont-tool-v1.11.apk` from the [Releases](https://github.com/WDhairya/xfont-tool/releases) section and install it.
+1. **Download & Install**: Grab the latest `xfont-tool-v1.11.apk` from the [Releases](https://github.com/wdhairyaa/xfont-tool/releases) section and install it.
 2. **Add Your Fonts**: Tap the **+** FAB to import any `.ttf`, `.otf`, or variable font files or whole font folders.
 3. **Customize / Preview**: Tap the font to enter preview mode. For variable fonts, tweak the sliders to your preferred weight or optical size.
 4. **Build Font APK**: Tap **Apply Font**, then tap **Install Font APK** and confirm installation in the system package installer.
@@ -116,7 +116,7 @@ To compile the project locally:
 
 ```bash
 # Clone the repository
-git clone https://github.com/WDhairya/xfont-tool.git
+git clone https://github.com/wdhairyaa/xfont-tool.git
 cd xfont-tool
 
 # Build release APK
@@ -131,7 +131,7 @@ The output APK will be generated at:
 ## 🤝 Community & Feedback
 
 Testing across diverse ColorOS and OxygenOS devices helps ensure rock-solid compatibility. If you test xFont Tool on your device:
-- Open an [Issue](https://github.com/WDhairya/xfont-tool/issues) or [Discussion](https://github.com/WDhairya/xfont-tool/discussions) with your device model, Android version, and UI version.
+- Open an [Issue](https://github.com/wdhairyaa/xfont-tool/issues) or [Discussion](https://github.com/wdhairyaa/xfont-tool/discussions) with your device model, Android version, and UI version.
 - Pull requests and feature suggestions are always welcome!
 
 ---
@@ -139,7 +139,7 @@ Testing across diverse ColorOS and OxygenOS devices helps ensure rock-solid comp
 ## 📜 License
 
 ```
-Copyright 2026 WDhairya
+Copyright 2026 wdhairyaa
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
