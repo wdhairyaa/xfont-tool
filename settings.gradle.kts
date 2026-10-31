@@ -1,0 +1,38 @@
+pluginManagement {
+  repositories {
+    google {
+      content {
+        includeGroupByRegex("androidx.*")
+        includeGroupByRegex("com\\.android.*")
+        includeGroupByRegex("com\\.google.*")
+      }
+    }
+    mavenCentral()
+    maven("https://chaquo.com/maven")
+    gradlePluginPortal()
+  }
+}
+
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    google {
+      content {
+        includeGroupByRegex("androidx.*")
+        includeGroupByRegex("com\\.android.*")
+        includeGroupByRegex("com\\.google.*")
+      }
+    }
+    mavenCentral()
+    maven("https://chaquo.com/maven")
+  }
+}
+
+plugins {
+  id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
+rootProject.name = "xFont"
+
+include(":app")
+include(":font_template")
