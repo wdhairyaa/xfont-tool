@@ -1,5 +1,8 @@
 package com.xfont.app.ui.preview
 
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.xfont.app.ui.theme.pressScale
 import android.graphics.Typeface
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -76,6 +79,7 @@ fun FontPreviewScreen(
     onBack: () -> Unit,
     onApplyFont: (FontItem, Map<String, Float>) -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     var detectedAxes by remember { mutableStateOf<List<VariableAxis>>(emptyList()) }
     var fontTypeface by remember { mutableStateOf<Typeface?>(null) }
     var cachedFontFile by remember { mutableStateOf<File?>(null) }
@@ -424,6 +428,9 @@ fun FontPreviewScreen(
                                                 val stepCount = Math.round((newVal - axis.min) / step)
                                                 (axis.min + stepCount * step).coerceIn(axis.min, axis.max)
                                             } else newVal
+                                            if (snapped != currentVal) {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                            }
                                             axisValues[axis.tag] = snapped
                                         },
                                         valueRange = axis.min..axis.max,
@@ -439,9 +446,12 @@ fun FontPreviewScreen(
             }
         }
 
-        // Floating Apply Font Button with subtle shadow for contrast
+        // Floating Apply Font Button with subtle shadow and spring press scale
         Button(
-            onClick = { onApplyFont(fontItem, axisValues.toMap()) },
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onApplyFont(fontItem, axisValues.toMap())
+            },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
@@ -452,7 +462,8 @@ fun FontPreviewScreen(
                     elevation = 8.dp,
                     shape = RoundedCornerShape(28.dp),
                     spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-                ),
+                )
+                .pressScale(0.97f),
             shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,

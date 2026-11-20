@@ -17,6 +17,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.IntOffset
+import com.xfont.app.ui.theme.pressScale
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -215,12 +219,20 @@ class MainActivity : ComponentActivity() {
                         AnimatedContent(
                             targetState = currentDestination,
                             transitionSpec = {
+                                val springSpec = spring<IntOffset>(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow)
+                                val fadeSpring = spring<Float>(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow)
                                 if (targetState is AppDestination.MainTabs) {
-                                    (slideInHorizontally { -it } + fadeIn()) togetherWith
-                                            (slideOutHorizontally { it } + fadeOut())
+                                    (slideInHorizontally(animationSpec = springSpec) { -(it * 0.32f).toInt() } +
+                                            fadeIn(animationSpec = fadeSpring) +
+                                            scaleIn(animationSpec = fadeSpring, initialScale = 0.95f)) togetherWith
+                                            (slideOutHorizontally(animationSpec = springSpec) { it } +
+                                                    fadeOut(animationSpec = fadeSpring))
                                 } else {
-                                    (slideInHorizontally { it } + fadeIn()) togetherWith
-                                            (slideOutHorizontally { -it } + fadeOut())
+                                    (slideInHorizontally(animationSpec = springSpec) { it } +
+                                            fadeIn(animationSpec = fadeSpring)) togetherWith
+                                            (slideOutHorizontally(animationSpec = springSpec) { -(it * 0.32f).toInt() } +
+                                                    fadeOut(animationSpec = fadeSpring) +
+                                                    scaleOut(animationSpec = fadeSpring, targetScale = 0.95f))
                                 }
                             },
                             label = "NavigationTransition"
@@ -342,6 +354,7 @@ fun FloatingNavBar(
     onCreateFolder: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
     Box(
         modifier = modifier.wrapContentSize(),
         contentAlignment = Alignment.BottomCenter
@@ -374,6 +387,7 @@ fun FloatingNavBar(
             ) {
                 ExtendedFloatingActionButton(
                     onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onFabToggle()
                         onAddFont()
                     },
@@ -382,11 +396,13 @@ fun FloatingNavBar(
                     shape = RoundedCornerShape(18.dp),
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
+                    modifier = Modifier.pressScale(0.95f)
                 )
 
                 ExtendedFloatingActionButton(
                     onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onFabToggle()
                         onAddFolder()
                     },
@@ -395,11 +411,13 @@ fun FloatingNavBar(
                     shape = RoundedCornerShape(18.dp),
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
+                    modifier = Modifier.pressScale(0.95f)
                 )
 
                 ExtendedFloatingActionButton(
                     onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onFabToggle()
                         onCreateFolder()
                     },
@@ -408,7 +426,8 @@ fun FloatingNavBar(
                     shape = RoundedCornerShape(18.dp),
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
+                    modifier = Modifier.pressScale(0.95f)
                 )
             }
         }
@@ -439,14 +458,20 @@ fun FloatingNavBar(
                         icon = Icons.Outlined.Folder,
                         label = "Home",
                         targetWidth = 108.dp,
-                        onClick = { onTabSelected(0) }
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onTabSelected(0)
+                        }
                     )
                     FloatingNavTabItem(
                         selected = selectedTab == 1,
                         icon = Icons.Outlined.Settings,
                         label = "Settings",
                         targetWidth = 124.dp,
-                        onClick = { onTabSelected(1) }
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onTabSelected(1)
+                        }
                     )
                 }
             }
@@ -460,6 +485,7 @@ fun FloatingNavBar(
 
             Surface(
                 onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     if (selectedTab == 0) {
                         onFabToggle()
                     } else {
@@ -471,7 +497,9 @@ fun FloatingNavBar(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shadowElevation = 8.dp,
                 tonalElevation = 6.dp,
-                modifier = Modifier.size(58.dp)
+                modifier = Modifier
+                    .size(58.dp)
+                    .pressScale(0.93f)
             ) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -541,6 +569,7 @@ private fun FloatingNavTabItem(
         modifier = Modifier
             .fillMaxHeight()
             .width(tabWidth)
+            .pressScale(0.94f)
             .clip(CircleShape)
             .background(
                 color = activeBg.copy(alpha = contentAlpha),

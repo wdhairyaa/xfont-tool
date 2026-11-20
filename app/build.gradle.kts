@@ -12,8 +12,8 @@ android {
     applicationId = "com.xfont.app"
     minSdk = 26
     targetSdk = 36
-    versionCode = 112
-    versionName = "1.12"
+    versionCode = 113
+    versionName = "1.13"
 
     ndk {
       abiFilters += listOf("arm64-v8a", "x86_64")

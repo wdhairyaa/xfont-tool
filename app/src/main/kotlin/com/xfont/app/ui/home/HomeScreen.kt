@@ -77,6 +77,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.xfont.app.ui.theme.pressScale
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -139,6 +143,14 @@ fun HomeScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    val haptic = LocalHapticFeedback.current
+    val breadcrumbsListState = rememberLazyListState()
+
+    LaunchedEffect(breadcrumbs.size) {
+        if (breadcrumbs.isNotEmpty()) {
+            breadcrumbsListState.animateScrollToItem(breadcrumbs.size - 1)
+        }
+    }
 
     var searchQuery by remember { mutableStateOf("") }
     var isSearchFocused by remember { mutableStateOf(false) }
@@ -431,6 +443,7 @@ fun HomeScreen(
                 if (searchQuery.isBlank()) {
                     Spacer(modifier = Modifier.height(6.dp))
                     LazyRow(
+                        state = breadcrumbsListState,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
@@ -440,6 +453,7 @@ fun HomeScreen(
                         items(breadcrumbs) { crumb ->
                             val isCurrent = crumb.file?.absolutePath == currentFolder.absolutePath
                             FilterChip(
+                                modifier = Modifier.pressScale(0.95f),
                                 selected = isCurrent,
                                 onClick = {
                                     val idx = breadcrumbs.indexOf(crumb)
@@ -595,12 +609,15 @@ fun HomeScreen(
 
                         Card(
                             modifier = Modifier
+                                .animateItem()
+                                .pressScale(0.97f)
                                 .fillMaxWidth()
                                 .height(72.dp)
                                 .combinedClickable(
                                     onClick = {
                                         focusManager.clearFocus()
                                         if (isSelectionMode) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                             if (isSelected) selectedUris.remove(item.uri)
                                             else selectedUris.add(item.uri)
                                             if (selectedUris.isEmpty()) isSelectionMode = false
@@ -619,6 +636,7 @@ fun HomeScreen(
                                         }
                                     },
                                     onLongClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         if (!isSelectionMode) {
                                             isSelectionMode = true
                                             selectedUris.add(item.uri)
@@ -784,45 +802,67 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(onClick = {
-                            val selectedItems = items.filter { it.uri in selectedUris }
-                            clipboardState = ClipboardState(ClipboardOp.CUT, selectedItems)
-                            isSelectionMode = false
-                            selectedUris.clear()
-                        }) {
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                val selectedItems = items.filter { it.uri in selectedUris }
+                                clipboardState = ClipboardState(ClipboardOp.CUT, selectedItems)
+                                isSelectionMode = false
+                                selectedUris.clear()
+                            },
+                            modifier = Modifier.pressScale()
+                        ) {
                             Icon(Icons.Default.ContentCut, contentDescription = "Cut")
                         }
 
-                        IconButton(onClick = {
-                            val selectedItems = items.filter { it.uri in selectedUris }
-                            clipboardState = ClipboardState(ClipboardOp.COPY, selectedItems)
-                            isSelectionMode = false
-                            selectedUris.clear()
-                        }) {
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                val selectedItems = items.filter { it.uri in selectedUris }
+                                clipboardState = ClipboardState(ClipboardOp.COPY, selectedItems)
+                                isSelectionMode = false
+                                selectedUris.clear()
+                            },
+                            modifier = Modifier.pressScale()
+                        ) {
                             Icon(Icons.Default.ContentCopy, contentDescription = "Copy")
                         }
 
                         if (selectedUris.size == 1) {
-                            IconButton(onClick = {
-                                val item = items.find { it.uri in selectedUris }
-                                if (item != null) {
-                                    renameTarget = item
-                                    renameNewName = item.name
-                                    showRenameDialog = true
-                                }
-                            }) {
+                            IconButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    val item = items.find { it.uri in selectedUris }
+                                    if (item != null) {
+                                        renameTarget = item
+                                        renameNewName = if (!item.isDirectory && item.name.contains(".")) {
+                                            item.name.substringBeforeLast(".")
+                                        } else {
+                                            item.name
+                                        }
+                                        showRenameDialog = true
+                                    }
+                                },
+                                modifier = Modifier.pressScale()
+                            ) {
                                 Icon(Icons.Default.Edit, contentDescription = "Rename")
                             }
                         }
 
-                        IconButton(onClick = { showDeleteConfirmDialog = true }) {
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showDeleteConfirmDialog = true
+                            },
+                            modifier = Modifier.pressScale()
+                        ) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
             }
 
-            // Clipboard Action Bar (Floating Pill: Paste / Cancel)
+            // Clipboard Action Bar (Floating Pill: Paste / New Folder / Cancel)
             AnimatedVisibility(
                 visible = clipboardState != null,
                 enter = slideInVertically(
@@ -848,32 +888,57 @@ fun HomeScreen(
                     Row(
                         modifier = Modifier
                             .padding(horizontal = 20.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         val count = clipboardState?.items?.size ?: 0
+                        val opText = if (clipboardState?.op == ClipboardOp.CUT) "Move" else "Copy"
                         Text(
-                            text = "$count item(s) ready to paste",
+                            text = "$count item(s) ($opText)",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )
-                        IconButton(onClick = {
-                            val state = clipboardState
-                            if (state != null) {
-                                scope.launch {
-                                    fileManager.copyOrMove(
-                                        items = state.items,
-                                        targetDir = currentFolder,
-                                        isCut = state.op == ClipboardOp.CUT
-                                    )
-                                    clipboardState = null
-                                    refreshCurrentDirectory()
+
+                        // Create New Folder button without losing copied/cut state
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                newFolderName = ""
+                                showNewFolderDialog = true
+                            },
+                            modifier = Modifier.pressScale()
+                        ) {
+                            Icon(Icons.Default.CreateNewFolder, contentDescription = "New Folder")
+                        }
+
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                val state = clipboardState
+                                if (state != null) {
+                                    scope.launch {
+                                        fileManager.copyOrMove(
+                                            items = state.items,
+                                            targetDir = currentFolder,
+                                            isCut = state.op == ClipboardOp.CUT
+                                        )
+                                        clipboardState = null
+                                        refreshCurrentDirectory()
+                                    }
                                 }
-                            }
-                        }) {
+                            },
+                            modifier = Modifier.pressScale()
+                        ) {
                             Icon(Icons.Default.ContentPaste, contentDescription = "Paste")
                         }
-                        IconButton(onClick = { clipboardState = null }) {
+
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                clipboardState = null
+                            },
+                            modifier = Modifier.pressScale()
+                        ) {
                             Icon(Icons.Default.Close, contentDescription = "Cancel")
                         }
                     }
@@ -885,17 +950,25 @@ fun HomeScreen(
     // New Folder Dialog
     if (showNewFolderDialog) {
         AlertDialog(
+            shape = RoundedCornerShape(28.dp),
             onDismissRequest = {
                 showNewFolderDialog = false
                 newFolderName = ""
             },
-            title = { Text("Create New Folder") },
+            title = {
+                Text(
+                    text = "Create New Folder",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            },
             text = {
                 OutlinedTextField(
                     value = newFolderName,
                     onValueChange = { newFolderName = it },
                     label = { Text("Folder Name") },
                     singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
             },
@@ -913,7 +986,7 @@ fun HomeScreen(
                         }
                     }
                 ) {
-                    Text("Create")
+                    Text("Create", fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
@@ -927,31 +1000,70 @@ fun HomeScreen(
         )
     }
 
-    // Rename Dialog
+    // Rename Dialog (Locked file extensions so fonts never disappear)
     if (showRenameDialog && renameTarget != null) {
+        val target = renameTarget!!
+        val originalExt = if (!target.isDirectory && target.name.contains(".")) {
+            "." + target.name.substringAfterLast(".")
+        } else ""
+
         AlertDialog(
+            shape = RoundedCornerShape(28.dp),
             onDismissRequest = {
                 showRenameDialog = false
                 renameTarget = null
             },
-            title = { Text("Rename") },
-            text = {
-                OutlinedTextField(
-                    value = renameNewName,
-                    onValueChange = { renameNewName = it },
-                    label = { Text("New Name") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+            title = {
+                Text(
+                    text = if (target.isDirectory) "Rename Folder" else "Rename Font",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold
                 )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = renameNewName,
+                        onValueChange = { renameNewName = it },
+                        label = { Text("Name") },
+                        trailingIcon = if (originalExt.isNotEmpty()) {
+                            {
+                                Text(
+                                    text = originalExt,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(end = 12.dp)
+                                )
+                            }
+                        } else null,
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (originalExt.isNotEmpty()) {
+                        Text(
+                            text = "Extension ($originalExt) is protected to prevent the font from disappearing.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val target = renameTarget
-                        val name = renameNewName.trim()
-                        if (target != null && name.isNotEmpty()) {
+                        val baseName = renameNewName.trim()
+                        if (baseName.isNotEmpty()) {
+                            val finalName = if (target.isDirectory || originalExt.isEmpty()) {
+                                baseName
+                            } else if (baseName.endsWith(originalExt, ignoreCase = true)) {
+                                baseName
+                            } else {
+                                "$baseName$originalExt"
+                            }
                             scope.launch {
-                                fileManager.renameItem(target, name)
+                                fileManager.renameItem(target, finalName)
                                 showRenameDialog = false
                                 renameTarget = null
                                 isSelectionMode = false
@@ -961,7 +1073,7 @@ fun HomeScreen(
                         }
                     }
                 ) {
-                    Text("Rename")
+                    Text("Rename", fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
@@ -978,8 +1090,15 @@ fun HomeScreen(
     // Delete Confirmation Dialog
     if (showDeleteConfirmDialog) {
         AlertDialog(
+            shape = RoundedCornerShape(28.dp),
             onDismissRequest = { showDeleteConfirmDialog = false },
-            title = { Text("Delete Items") },
+            title = {
+                Text(
+                    text = "Delete Items",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            },
             text = {
                 Text("Are you sure you want to delete ${selectedUris.size} item(s)? This action cannot be undone.")
             },
@@ -998,7 +1117,7 @@ fun HomeScreen(
                         }
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text("Delete", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
@@ -1012,8 +1131,15 @@ fun HomeScreen(
     // Exit Confirmation Dialog
     if (showExitConfirmDialog) {
         AlertDialog(
+            shape = RoundedCornerShape(28.dp),
             onDismissRequest = { showExitConfirmDialog = false },
-            title = { Text("Exit xFont") },
+            title = {
+                Text(
+                    text = "Exit xFont",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            },
             text = { Text("Do you want to exit xFont?") },
             confirmButton = {
                 TextButton(
@@ -1022,7 +1148,7 @@ fun HomeScreen(
                         (context as? Activity)?.finish()
                     }
                 ) {
-                    Text("Exit")
+                    Text("Exit", fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {

@@ -52,6 +52,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.xfont.app.ui.theme.pressScale
 import com.xfont.app.engine.FontApkBuilder
 import com.xfont.app.manager.FontFileManager
 import com.xfont.app.model.FontItem
@@ -71,6 +74,7 @@ fun ApplyFontScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
 
     var isBuilding by remember { mutableStateOf(false) }
     var installedApkFile by remember { mutableStateOf<File?>(null) }
@@ -255,6 +259,7 @@ fun ApplyFontScreen(
 
                     Button(
                         onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             if (installedApkFile != null) {
                                 installApk(installedApkFile!!)
                             } else {
@@ -285,7 +290,8 @@ fun ApplyFontScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp),
+                            .height(52.dp)
+                            .pressScale(0.97f),
                         enabled = !isBuilding,
                         shape = MaterialTheme.shapes.medium
                     ) {
