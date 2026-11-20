@@ -209,10 +209,31 @@ class FontFileManager(private val context: Context) {
                 }
             }
 
-            val targetFile = File(targetDir, fileName)
+            var targetFile = File(targetDir, fileName)
             context.contentResolver.openInputStream(sourceUri)?.use { input ->
                 FileOutputStream(targetFile).use { output ->
                     input.copyTo(output)
+                }
+            }
+            if (targetFile.exists() && targetFile.length() >= 4) {
+                // Inspect sfnt magic bytes to guarantee proper .otf / .ttf extension
+                val header = ByteArray(4)
+                targetFile.inputStream().use { it.read(header) }
+                val isOtf = header[0] == 'O'.code.toByte() && header[1] == 'T'.code.toByte() &&
+                            header[2] == 'T'.code.toByte() && header[3] == 'O'.code.toByte()
+                val lower = targetFile.name.lowercase()
+                if (isOtf && !lower.endsWith(".otf")) {
+                    val correctedName = targetFile.nameWithoutExtension + ".otf"
+                    val correctedFile = File(targetDir, correctedName)
+                    if (targetFile.renameTo(correctedFile)) {
+                        targetFile = correctedFile
+                    }
+                } else if (!isOtf && !lower.endsWith(".ttf") && !lower.endsWith(".otf")) {
+                    val correctedName = targetFile.nameWithoutExtension + ".ttf"
+                    val correctedFile = File(targetDir, correctedName)
+                    if (targetFile.renameTo(correctedFile)) {
+                        targetFile = correctedFile
+                    }
                 }
             }
             val success = targetFile.exists() && targetFile.length() > 0

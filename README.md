@@ -5,7 +5,7 @@
 ### Modern Material 3 Expressive Font Manager & Custom Font Installer
 **Designed specifically for Realme UI, ColorOS, and OxygenOS**
 
-[![Release](https://img.shields.io/badge/Release-v1.11-7C4DFF?style=for-the-badge&logo=android)](https://github.com/wdhairyaa/xfont-tool/releases)
+[![Release](https://img.shields.io/badge/Release-v1.12-7C4DFF?style=for-the-badge&logo=android)](https://github.com/wdhairyaa/xfont-tool/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%20--%2015-34A853?style=for-the-badge&logo=android)](https://github.com/wdhairyaa/xfont-tool)
 [![Tested On](https://img.shields.io/badge/Tested%20On-Realme%20UI%206.0%20(Android%2015)-FF5252?style=for-the-badge&logo=oppo)](https://github.com/wdhairyaa/xfont-tool)
 [![Theme](https://img.shields.io/badge/UI-Material%203%20Expressive-6750A4?style=for-the-badge)](https://github.com/wdhairyaa/xfont-tool)
@@ -88,7 +88,7 @@ flowchart LR
 ```
 
 ### Detailed Steps:
-1. **Download & Install**: Grab the latest `xfont-tool-v1.11.apk` from the [Releases](https://github.com/wdhairyaa/xfont-tool/releases) section and install it.
+1. **Download & Install**: Grab the latest `xfont-tool-v1.12.apk` from the [Releases](https://github.com/wdhairyaa/xfont-tool/releases) section and install it.
 2. **Add Your Fonts**: Tap the **+** FAB to import any `.ttf`, `.otf`, or variable font files or whole font folders.
 3. **Customize / Preview**: Tap the font to enter preview mode. For variable fonts, tweak the sliders to your preferred weight or optical size.
 4. **Build Font APK**: Tap **Apply Font**, then tap **Install Font APK** and confirm installation in the system package installer.

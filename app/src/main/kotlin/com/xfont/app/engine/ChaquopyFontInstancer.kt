@@ -30,8 +30,14 @@ object ChaquopyFontInstancer {
 
         val cacheDir = context.cacheDir
         val timestamp = System.currentTimeMillis()
-        val tempInput = File(cacheDir, "input_var_${timestamp}.ttf")
-        val tempOutput = File(cacheDir, "frozen_${timestamp}.ttf")
+        val isOtf = rawFontBytes.size >= 4 &&
+                rawFontBytes[0] == 'O'.code.toByte() &&
+                rawFontBytes[1] == 'T'.code.toByte() &&
+                rawFontBytes[2] == 'T'.code.toByte() &&
+                rawFontBytes[3] == 'O'.code.toByte()
+        val ext = if (isOtf) "otf" else "ttf"
+        val tempInput = File(cacheDir, "input_var_${timestamp}.$ext")
+        val tempOutput = File(cacheDir, "frozen_${timestamp}.$ext")
 
         return try {
             tempInput.writeBytes(rawFontBytes)

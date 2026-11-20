@@ -252,6 +252,9 @@ class MainActivity : ComponentActivity() {
                                                         triggerAddFont = triggerAddFont,
                                                         triggerAddFolder = triggerAddFolder,
                                                         triggerCreateFolder = triggerCreateFolder,
+                                                        onResetTriggerAddFont = { triggerAddFont = 0 },
+                                                        onResetTriggerAddFolder = { triggerAddFolder = 0 },
+                                                        onResetTriggerCreateFolder = { triggerCreateFolder = 0 },
                                                         onFontSelected = { fontItem ->
                                                             folderScrollPositions[currentFolder.absolutePath] = Pair(homeListState.firstVisibleItemIndex, homeListState.firstVisibleItemScrollOffset)
                                                             lastTappedItemUri = fontItem.uri
@@ -347,16 +350,25 @@ fun FloatingNavBar(
         AnimatedVisibility(
             visible = selectedTab == 0 && isFabExpanded,
             enter = fadeIn(spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow)) +
-                    expandVertically(spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow)) +
+                    expandVertically(
+                        animationSpec = spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow),
+                        expandFrom = Alignment.Bottom,
+                        clip = false
+                    ) +
                     scaleIn(spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow), initialScale = 0.85f),
             exit = fadeOut(spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow)) +
-                   shrinkVertically(spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow)) +
+                   shrinkVertically(
+                       animationSpec = spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow),
+                       shrinkTowards = Alignment.Bottom,
+                       clip = false
+                   ) +
                    scaleOut(spring(dampingRatio = 0.55f, stiffness = Spring.StiffnessMediumLow), targetScale = 0.85f),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 72.dp)
         ) {
             Column(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {

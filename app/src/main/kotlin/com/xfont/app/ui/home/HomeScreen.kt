@@ -131,6 +131,9 @@ fun HomeScreen(
     triggerAddFont: Int = 0,
     triggerAddFolder: Int = 0,
     triggerCreateFolder: Int = 0,
+    onResetTriggerAddFont: () -> Unit = {},
+    onResetTriggerAddFolder: () -> Unit = {},
+    onResetTriggerCreateFolder: () -> Unit = {},
     onFontSelected: (FontItem) -> Unit
 ) {
     val context = LocalContext.current
@@ -189,7 +192,20 @@ fun HomeScreen(
 
     LaunchedEffect(triggerAddFont) {
         if (triggerAddFont > 0) {
-            fontPickerLauncher.launch(arrayOf("*/*"))
+            fontPickerLauncher.launch(
+                arrayOf(
+                    "font/otf",
+                    "font/ttf",
+                    "font/*",
+                    "application/font-sfnt",
+                    "application/x-font-opentype",
+                    "application/x-font-ttf",
+                    "application/vnd.ms-opentype",
+                    "application/octet-stream",
+                    "*/*"
+                )
+            )
+            onResetTriggerAddFont()
         }
     }
 
@@ -209,6 +225,7 @@ fun HomeScreen(
     LaunchedEffect(triggerAddFolder) {
         if (triggerAddFolder > 0) {
             folderTreePickerLauncher.launch(null)
+            onResetTriggerAddFolder()
         }
     }
 
@@ -216,6 +233,7 @@ fun HomeScreen(
         if (triggerCreateFolder > 0) {
             newFolderName = ""
             showNewFolderDialog = true
+            onResetTriggerCreateFolder()
         }
     }
 
@@ -237,20 +255,21 @@ fun HomeScreen(
 
     LaunchedEffect(currentFolder, items) {
         if (items.isNotEmpty()) {
-            if (lastTappedItemUri != null) {
+            val saved = folderScrollPositions[currentFolder.absolutePath]
+            if (saved != null) {
+                val safeIndex = saved.first.coerceAtMost(items.size - 1)
+                lazyListState.scrollToItem(safeIndex, saved.second)
+                onLastTappedItemUriChange(null)
+            } else if (lastTappedItemUri != null) {
                 val targetIdx = items.indexOfFirst {
                     it.uri == lastTappedItemUri || (lastTappedItemUri.path != null && it.file?.absolutePath == lastTappedItemUri.path)
                 }
                 if (targetIdx != -1) {
                     lazyListState.scrollToItem(targetIdx)
-                    onLastTappedItemUriChange(null)
-                    return@LaunchedEffect
+                } else {
+                    lazyListState.scrollToItem(0, 0)
                 }
-            }
-            val saved = folderScrollPositions[currentFolder.absolutePath]
-            if (saved != null) {
-                val safeIndex = saved.first.coerceAtMost(items.size - 1)
-                lazyListState.scrollToItem(safeIndex, saved.second)
+                onLastTappedItemUriChange(null)
             } else {
                 lazyListState.scrollToItem(0, 0)
             }
@@ -706,8 +725,9 @@ fun HomeScreen(
                                         )
                                     } else {
                                         val kb = item.sizeBytes / 1024
+                                        val format = if (item.name.lowercase().endsWith(".otf")) "OTF" else "TTF"
                                         Text(
-                                            text = "${kb} KB",
+                                            text = "$format • ${kb} KB",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.outline
                                         )
